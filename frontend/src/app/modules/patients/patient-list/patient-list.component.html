@@ -1,0 +1,207 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gh-fg-default">Patients</h1>
+      <p class="text-gh-fg-muted mt-1">Gestion des dossiers patients</p>
+    </div>
+    @if (permissionService.canCreatePatient()) {
+      <button (click)="openAddModal()" class="btn-primary">
+        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Nouveau Patient
+      </button>
+    }
+  </div>
+
+  <!-- Search Bar -->
+  <div class="card-gh">
+    <app-search-bar (search)="onSearch($event)"></app-search-bar>
+  </div>
+
+  <!-- Error Message -->
+  @if (error) {
+    <div class="card-gh bg-red-900/20 border-gh-danger">
+      <p class="text-gh-danger">{{ error }}</p>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="flex items-center justify-center py-20">
+      <svg class="animate-spin h-12 w-12 text-gh-accent" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  }
+
+  <!-- Patients Table -->
+  @if (!isLoading && patients.length > 0) {
+    <div class="card-gh overflow-hidden p-0">
+      <div class="overflow-x-auto">
+        <table class="table-gh">
+          <thead>
+            <tr>
+              <th>Nom Complet</th>
+              <th>CIN</th>
+              <th>Âge</th>
+              <th>Sexe</th>
+              <th>Téléphone</th>
+              <th>Email</th>
+              <th>Groupe Sanguin</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (patient of patients; track patient.id) {
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gh-accent/20 rounded-full flex items-center justify-center">
+                      <span class="text-gh-accent font-semibold">
+                        {{ patient.nom.charAt(0) }}{{ patient.prenom.charAt(0) }}
+                      </span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gh-fg-default">{{ patient.nom }} {{ patient.prenom }}</p>
+                      <p class="text-xs text-gh-fg-muted">{{ patient.dateNaissance | date:'dd/MM/yyyy' }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="font-mono text-sm">{{ patient.cin }}</td>
+                <td>{{ calculateAge(patient.dateNaissance) }} ans</td>
+                <td>
+                  <span [class]="patient.sexe === 'M' ? 'badge badge-info' : 'badge badge-warning'">
+                    {{ patient.sexe === 'M' ? 'Homme' : 'Femme' }}
+                  </span>
+                </td>
+                <td class="text-gh-fg-muted">{{ patient.telephone }}</td>
+                <td class="text-gh-fg-muted">{{ patient.email }}</td>
+                <td>
+                  @if (patient.groupeSanguin) {
+                    <span class="badge badge-danger">{{ patient.groupeSanguin }}</span>
+                  } @else {
+                    <span class="text-gh-fg-subtle">-</span>
+                  }
+                </td>
+                <td>
+                  <div class="flex items-center justify-end gap-2">
+                    <button (click)="viewPatient(patient)" class="btn-secondary py-1 px-3 text-xs">
+                      <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    @if (permissionService.canEditPatient()) {
+                      <button (click)="editPatient(patient)" class="btn-secondary py-1 px-3 text-xs">
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    }
+                    @if (permissionService.canDeletePatient()) {
+                      <button (click)="confirmDelete(patient)" class="btn-danger py-1 px-3 text-xs">
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (pageData) {
+        <div class="px-6 pb-6">
+          <app-pagination
+            [currentPage]="pageData.currentPage"
+            [totalPages]="pageData.totalPages"
+            [totalElements]="pageData.totalElements"
+            [size]="pageData.size"
+            (pageChange)="onPageChange($event)"
+          ></app-pagination>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && patients.length === 0) {
+    <div class="card-gh text-center py-12">
+      <svg class="w-16 h-16 mx-auto text-gh-fg-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+      <h3 class="text-lg font-medium text-gh-fg-default mb-2">Aucun patient trouvé</h3>
+      <p class="text-gh-fg-muted mb-6">
+        @if (searchKeyword) {
+          Aucun résultat pour "{{ searchKeyword }}"
+        } @else {
+          Commencez par ajouter votre premier patient
+        }
+      </p>
+      @if (permissionService.canCreatePatient()) {
+        <button (click)="openAddModal()" class="btn-primary">
+          <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Ajouter un patient
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<!-- Patient Form Modal (Add) -->
+<app-patient-form 
+  [show]="showAddModal" 
+  (close)="closeAddModal()" 
+  (success)="onPatientAdded()"
+></app-patient-form>
+
+<!-- Patient Form Modal (Edit) -->
+<app-patient-form 
+  [show]="showEditModal"
+  [patient]="patientToEdit"
+  (close)="closeEditModal()" 
+  (success)="onPatientEdited()"
+></app-patient-form>
+
+<!-- Patient Detail Modal -->
+<app-patient-detail
+  [show]="showDetailModal"
+  [patientId]="selectedPatientId"
+  (close)="closeDetailModal()"
+></app-patient-detail>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal && patientToDelete) {
+  <div (click)="cancelDelete()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div (click)="$event.stopPropagation()" class="card-gh max-w-md w-full">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-6 h-6 text-gh-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gh-fg-default mb-2">Confirmer la suppression</h3>
+          <p class="text-gh-fg-muted mb-6">
+            Êtes-vous sûr de vouloir supprimer le patient 
+            <span class="font-medium text-gh-fg-default">{{ patientToDelete.nom }} {{ patientToDelete.prenom }}</span> ?
+            Cette action est irréversible.
+          </p>
+          <div class="flex gap-3 justify-end">
+            <button (click)="cancelDelete()" class="btn-secondary">Annuler</button>
+            <button (click)="deletePatient()" class="btn-danger">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

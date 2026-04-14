@@ -1,0 +1,111 @@
+@if (show) {
+  <div (click)="onClose()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div (click)="$event.stopPropagation()" class="card-gh max-w-2xl w-full my-8">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gh-accent/20 rounded-full flex items-center justify-center">
+            @if (patient) {
+              <span class="text-xl font-bold text-gh-accent">
+                {{ patient.nom.charAt(0) }}{{ patient.prenom.charAt(0) }}
+              </span>
+            }
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gh-fg-default">Détails du Patient</h3>
+            <p class="text-sm text-gh-fg-muted">Informations complètes</p>
+          </div>
+        </div>
+        <button (click)="onClose()" class="btn-secondary p-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      @if (isLoading) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="animate-spin h-8 w-8 text-gh-accent" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      } @else if (error) {
+        <div class="p-4 bg-red-900/20 border border-gh-danger rounded-md">
+          <p class="text-gh-danger">{{ error }}</p>
+        </div>
+      } @else if (patient) {
+        <div class="space-y-6">
+          <!-- Identité -->
+          <div>
+            <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Identité</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Nom complet</p>
+                <p class="text-gh-fg-default font-medium">{{ patient.nom }} {{ patient.prenom }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">CIN</p>
+                <p class="text-gh-fg-default font-mono">{{ patient.cin }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Date de naissance</p>
+                <p class="text-gh-fg-default">{{ patient.dateNaissance | date:'dd/MM/yyyy' }} ({{ calculateAge(patient.dateNaissance) }} ans)</p>
+              </div>
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Sexe</p>
+                <span [class]="patient.sexe === 'M' ? 'badge badge-info' : 'badge badge-warning'">
+                  {{ patient.sexe === 'M' ? 'Homme' : 'Femme' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact -->
+          <div>
+            <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Contact</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Téléphone</p>
+                <p class="text-gh-fg-default">{{ patient.telephone }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Email</p>
+                <p class="text-gh-fg-default">{{ patient.email || '-' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations médicales -->
+          <div>
+            <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Informations médicales</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Groupe sanguin</p>
+                @if (patient.groupeSanguin) {
+                  <span class="badge badge-danger">{{ patient.groupeSanguin }}</span>
+                } @else {
+                  <p class="text-gh-fg-subtle">Non renseigné</p>
+                }
+              </div>
+            </div>
+            @if (patient.antecedents) {
+              <div class="mt-4">
+                <p class="text-xs text-gh-fg-muted mb-1">Antécédents médicaux</p>
+                <div class="p-3 bg-gh-canvas-subtle rounded-md">
+                  <p class="text-sm text-gh-fg-default">{{ patient.antecedents }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end mt-6 pt-6 border-t border-gh-border">
+          <button (click)="onClose()" class="btn-secondary">Fermer</button>
+        </div>
+      }
+    </div>
+  </div>
+}

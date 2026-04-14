@@ -1,0 +1,232 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gh-fg-default">Rendez-vous</h1>
+      <p class="text-gh-fg-muted mt-1">Gestion des consultations</p>
+    </div>
+    @if (permissionService.canCreateRendezVous()) {
+      <button (click)="openAddModal()" class="btn-primary">
+        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Nouveau Rendez-vous
+      </button>
+    }
+  </div>
+
+  <!-- Filters -->
+  <div class="card-gh">
+    <div class="flex items-center gap-4">
+      <div class="flex-1">
+        <label class="block text-sm font-medium text-gh-fg-default mb-2">Filtrer par statut</label>
+        <select [(ngModel)]="selectedStatut" (change)="onStatutChange()" class="input-gh">
+          @for (statut of statuts; track statut.value) {
+            <option [value]="statut.value">{{ statut.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  @if (error) {
+    <div class="card-gh bg-red-900/20 border-gh-danger">
+      <p class="text-gh-danger">{{ error }}</p>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="flex items-center justify-center py-20">
+      <svg class="animate-spin h-12 w-12 text-gh-accent" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  }
+
+  <!-- Rendez-vous Table -->
+  @if (!isLoading && rendezVous.length > 0) {
+    <div class="card-gh overflow-hidden p-0">
+      <div class="overflow-x-auto">
+        <table class="table-gh">
+          <thead>
+            <tr>
+              <th>Date & Heure</th>
+              <th>Patient</th>
+              <th>Médecin</th>
+              <th>Motif</th>
+              <th>Statut</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rdv of rendezVous; track rdv.id) {
+              <tr [class.bg-gh-canvas-subtle]="isUpcoming(rdv.dateHeure)">
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gh-warning/20 rounded-lg flex items-center justify-center">
+                      <svg class="w-5 h-5 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gh-fg-default">{{ formatDateTime(rdv.dateHeure) }}</p>
+                      @if (isUpcoming(rdv.dateHeure)) {
+                        <p class="text-xs text-gh-warning">À venir</p>
+                      }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  @if (rdv.patient) {
+                    <div>
+                      <p class="font-medium text-gh-fg-default">{{ rdv.patient.nom }} {{ rdv.patient.prenom }}</p>
+                      <p class="text-xs text-gh-fg-muted">{{ rdv.patient.cin }}</p>
+                    </div>
+                  } @else {
+                    <span class="text-gh-fg-subtle">-</span>
+                  }
+                </td>
+                <td>
+                  @if (rdv.medecin) {
+                    <div>
+                      <p class="font-medium text-gh-fg-default">Dr. {{ rdv.medecin.nom }} {{ rdv.medecin.prenom }}</p>
+                      <p class="text-xs text-gh-fg-muted">{{ rdv.medecin.specialite }}</p>
+                    </div>
+                  } @else {
+                    <span class="text-gh-fg-subtle">-</span>
+                  }
+                </td>
+                <td class="max-w-xs">
+                  <p class="text-gh-fg-default truncate">{{ rdv.motif }}</p>
+                  @if (rdv.notes) {
+                    <p class="text-xs text-gh-fg-muted truncate">{{ rdv.notes }}</p>
+                  }
+                </td>
+                <td>
+                  <span [class]="'badge ' + getStatutBadgeClass(rdv.statut)">
+                    {{ getStatutLabel(rdv.statut) }}
+                  </span>
+                </td>
+                <td>
+                  <div class="flex items-center justify-end gap-2">
+                    <button (click)="viewRdv(rdv)" class="btn-secondary py-1 px-3 text-xs">
+                      <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                    @if (permissionService.canEditRendezVous()) {
+                      <button (click)="editRdv(rdv)" class="btn-secondary py-1 px-3 text-xs">
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    }
+                    @if (permissionService.canDeleteRendezVous()) {
+                      <button (click)="confirmDelete(rdv)" class="btn-danger py-1 px-3 text-xs">
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (pageData) {
+        <div class="px-6 pb-6">
+          <app-pagination
+            [currentPage]="pageData.currentPage"
+            [totalPages]="pageData.totalPages"
+            [totalElements]="pageData.totalElements"
+            [size]="pageData.size"
+            (pageChange)="onPageChange($event)"
+          ></app-pagination>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && rendezVous.length === 0) {
+    <div class="card-gh text-center py-12">
+      <svg class="w-16 h-16 mx-auto text-gh-fg-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <h3 class="text-lg font-medium text-gh-fg-default mb-2">Aucun rendez-vous trouvé</h3>
+      <p class="text-gh-fg-muted mb-6">
+        @if (selectedStatut) {
+          Aucun rendez-vous avec le statut sélectionné
+        } @else {
+          Commencez par planifier votre premier rendez-vous
+        }
+      </p>
+      @if (permissionService.canCreateRendezVous()) {
+        <button (click)="openAddModal()" class="btn-primary">
+          <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Planifier un rendez-vous
+        </button>
+      }
+    </div>
+  }
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal && rdvToDelete) {
+  <div (click)="cancelDelete()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div (click)="$event.stopPropagation()" class="card-gh max-w-md w-full">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 bg-red-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+          <svg class="w-6 h-6 text-gh-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-gh-fg-default mb-2">Confirmer la suppression</h3>
+          <p class="text-gh-fg-muted mb-6">
+            Êtes-vous sûr de vouloir supprimer ce rendez-vous du 
+            <span class="font-medium text-gh-fg-default">{{ formatDateTime(rdvToDelete.dateHeure) }}</span> ?
+            Cette action est irréversible.
+          </p>
+          <div class="flex gap-3 justify-end">
+            <button (click)="cancelDelete()" class="btn-secondary">Annuler</button>
+            <button (click)="deleteRendezVous()" class="btn-danger">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- RDV Form Modal (Add) -->
+<app-rdv-form 
+  [show]="showAddModal" 
+  (close)="closeAddModal()" 
+  (success)="onRdvAdded()"
+></app-rdv-form>
+
+<!-- RDV Detail Modal -->
+<app-rdv-detail
+  [rdvId]="selectedRdvId"
+  [show]="showDetailModal"
+  (close)="closeDetailModal()"
+></app-rdv-detail>
+
+<!-- RDV Form Modal (Edit) -->
+<app-rdv-form
+  [show]="showEditModal"
+  [rdv]="rdvToEdit"
+  (close)="closeEditModal()"
+  (success)="onRdvEdited()"
+></app-rdv-form>

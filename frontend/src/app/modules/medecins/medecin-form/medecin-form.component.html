@@ -1,0 +1,121 @@
+@if (show) {
+  <div (click)="onClose()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div (click)="$event.stopPropagation()" class="card-gh max-w-2xl w-full my-8">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gh-success/20 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-gh-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gh-fg-default">{{ isEditMode ? 'Modifier' : 'Nouveau' }} Médecin</h3>
+            <p class="text-sm text-gh-fg-muted">{{ isEditMode ? 'Modifier les informations du médecin' : 'Ajouter un nouveau médecin au personnel' }}</p>
+          </div>
+        </div>
+        <button (click)="onClose()" class="btn-secondary p-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="medecinForm" (ngSubmit)="onSubmit()">
+        @if (errorMessage) {
+          <div class="mb-4 p-3 bg-red-900/20 border border-gh-danger rounded-md">
+            <p class="text-sm text-gh-danger">{{ errorMessage }}</p>
+          </div>
+        }
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nom -->
+          <div>
+            <label class="block text-sm font-medium text-gh-fg-default mb-2">Nom *</label>
+            <input type="text" formControlName="nom" class="input-gh" placeholder="Nom de famille" />
+            @if (medecinForm.get('nom')?.invalid && medecinForm.get('nom')?.touched) {
+              <p class="mt-1 text-xs text-gh-danger">Nom requis (min. 2 caractères)</p>
+            }
+          </div>
+
+          <!-- Prénom -->
+          <div>
+            <label class="block text-sm font-medium text-gh-fg-default mb-2">Prénom *</label>
+            <input type="text" formControlName="prenom" class="input-gh" placeholder="Prénom" />
+            @if (medecinForm.get('prenom')?.invalid && medecinForm.get('prenom')?.touched) {
+              <p class="mt-1 text-xs text-gh-danger">Prénom requis (min. 2 caractères)</p>
+            }
+          </div>
+
+          <!-- Spécialité -->
+          <div>
+            <label class="block text-sm font-medium text-gh-fg-default mb-2">Spécialité *</label>
+            <select formControlName="specialite" class="input-gh">
+              <option value="">Sélectionner une spécialité</option>
+              @for (spec of specialites; track spec) {
+                <option [value]="spec">{{ spec }}</option>
+              }
+            </select>
+            @if (medecinForm.get('specialite')?.invalid && medecinForm.get('specialite')?.touched) {
+              <p class="mt-1 text-xs text-gh-danger">Spécialité requise</p>
+            }
+          </div>
+
+          <!-- Matricule -->
+          <div>
+            <label class="block text-sm font-medium text-gh-fg-default mb-2">Matricule *</label>
+            <input type="text" formControlName="matricule" class="input-gh" placeholder="MED001" />
+            @if (medecinForm.get('matricule')?.invalid && medecinForm.get('matricule')?.touched) {
+              <p class="mt-1 text-xs text-gh-danger">Matricule requis (min. 3 caractères)</p>
+            }
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block text-sm font-medium text-gh-fg-default mb-2">Email</label>
+            <input type="email" formControlName="email" class="input-gh" placeholder="email@clinique.ma" />
+            @if (medecinForm.get('email')?.invalid && medecinForm.get('email')?.touched) {
+              <p class="mt-1 text-xs text-gh-danger">Email invalide</p>
+            }
+          </div>
+
+          <!-- Téléphone -->
+          <div>
+            <label class="block text-sm font-medium text-gh-fg-default mb-2">Téléphone *</label>
+            <input type="tel" formControlName="telephone" class="input-gh" placeholder="+221123456789" />
+            @if (medecinForm.get('telephone')?.invalid && medecinForm.get('telephone')?.touched) {
+              <p class="mt-1 text-xs text-gh-danger">Téléphone requis</p>
+            }
+          </div>
+        </div>
+
+        <!-- Disponibilité -->
+        <div class="mt-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" formControlName="disponible" class="w-4 h-4 text-gh-accent bg-gh-canvas border-gh-border rounded focus:ring-gh-accent" />
+            <span class="text-sm font-medium text-gh-fg-default">Médecin disponible pour les consultations</span>
+          </label>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-3 justify-end mt-6 pt-6 border-t border-gh-border">
+          <button type="button" (click)="onClose()" class="btn-secondary">Annuler</button>
+          <button type="submit" [disabled]="medecinForm.invalid || isLoading" class="btn-success disabled:opacity-50">
+            @if (isLoading) {
+              <span class="flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Création...
+              </span>
+            } @else {
+              {{ isEditMode ? 'Modifier le médecin' : 'Créer le médecin' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

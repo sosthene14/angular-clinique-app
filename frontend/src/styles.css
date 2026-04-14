@@ -1,0 +1,275 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gh-canvas text-gh-fg-default transition-colors duration-200;
+  }
+  
+  .light body {
+    @apply bg-light-canvas text-light-fg-default;
+  }
+}
+
+@layer components {
+  /* GitHub-style buttons */
+  .btn-gh {
+    @apply px-4 py-2 rounded-md font-medium text-sm transition-colors duration-200;
+  }
+  
+  .btn-primary {
+    @apply btn-gh bg-gh-accent text-white hover:bg-gh-accent-emphasis;
+  }
+  
+  .light .btn-primary {
+    @apply bg-light-accent hover:bg-light-accent-emphasis;
+  }
+  
+  .btn-secondary {
+    @apply btn-gh bg-gh-btn-bg text-gh-fg-default border border-gh-border hover:bg-gh-btn-hover;
+  }
+  
+  .light .btn-secondary {
+    @apply bg-light-btn-bg text-light-fg-default border-light-border hover:bg-light-btn-hover;
+  }
+  
+  .btn-danger {
+    @apply btn-gh bg-gh-danger text-white hover:bg-red-700;
+  }
+  
+  .light .btn-danger {
+    @apply bg-light-danger hover:bg-red-800;
+  }
+  
+  .btn-success {
+    @apply btn-gh bg-gh-success text-white hover:bg-green-700;
+  }
+  
+  .light .btn-success {
+    @apply bg-light-success hover:bg-green-800;
+  }
+
+  /* GitHub-style cards */
+  .card-gh {
+    @apply bg-gh-canvas-subtle border border-gh-border rounded-lg p-6 transition-colors duration-200;
+  }
+  
+  .light .card-gh {
+    @apply bg-light-canvas-subtle border-light-border;
+  }
+
+  /* GitHub-style inputs */
+  .input-gh {
+    @apply w-full px-3 py-2 bg-gh-canvas border border-gh-border rounded-md text-gh-fg-default placeholder-gh-fg-subtle focus:border-gh-accent focus:outline-none focus:ring-1 focus:ring-gh-accent transition-colors duration-200;
+  }
+  
+  .light .input-gh {
+    @apply bg-light-canvas border-light-border text-light-fg-default placeholder-light-fg-subtle focus:border-light-accent focus:ring-light-accent;
+  }
+
+  /* GitHub-style table */
+  .table-gh {
+    @apply w-full border-collapse;
+  }
+  
+  .table-gh thead {
+    @apply bg-gh-canvas-subtle border-b border-gh-border;
+  }
+  
+  .table-gh th {
+    @apply px-4 py-3 text-left text-xs font-semibold text-gh-fg-muted uppercase tracking-wider;
+  }
+  
+  .table-gh td {
+    @apply px-4 py-3 border-b border-gh-border-muted text-sm;
+  }
+  
+  .table-gh tbody tr {
+    @apply hover:bg-gh-canvas-subtle transition-colors;
+  }
+
+  /* GitHub-style badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply badge bg-green-900/30 text-gh-success border border-green-800;
+  }
+  
+  .badge-warning {
+    @apply badge bg-yellow-900/30 text-gh-warning border border-yellow-800;
+  }
+  
+  .badge-danger {
+    @apply badge bg-red-900/30 text-gh-danger border border-red-800;
+  }
+  
+  .badge-info {
+    @apply badge bg-blue-900/30 text-gh-accent border border-blue-800;
+  }
+
+  /* GitHub-style navigation */
+  .nav-link {
+    @apply px-4 py-2 text-gh-fg-muted hover:text-gh-fg-default hover:bg-gh-canvas-subtle rounded-md transition-colors;
+  }
+  
+  .nav-link-active {
+    @apply nav-link text-gh-fg-default bg-gh-canvas-subtle;
+  }
+
+  /* GitHub-style search */
+  .search-box {
+    @apply flex items-center bg-gh-canvas border border-gh-border rounded-md px-3 py-2 focus-within:border-gh-accent focus-within:ring-1 focus-within:ring-gh-accent;
+  }
+  
+  .search-box input {
+    @apply bg-transparent border-0 text-gh-fg-default placeholder-gh-fg-subtle focus:outline-none flex-1;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0d1117;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}
+
+/* Light mode text improvements */
+.light h1,
+.light h2,
+.light h3,
+.light .text-gh-fg-default {
+  @apply text-light-fg-default;
+}
+
+.light .text-gh-fg-muted {
+  @apply text-light-fg-muted;
+}
+
+.light .text-gh-fg-subtle {
+  @apply text-light-fg-subtle;
+}
+
+/* Light mode table */
+.light .table-gh thead {
+  @apply bg-light-canvas-subtle border-light-border;
+}
+
+.light .table-gh th {
+  @apply text-light-fg-muted;
+}
+
+.light .table-gh td {
+  @apply border-light-border-muted text-light-fg-default;
+}
+
+.light .table-gh tbody tr:hover {
+  @apply bg-light-canvas-subtle;
+}
+
+/* Light mode header */
+.light header {
+  @apply bg-light-canvas-subtle border-light-border;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.light .nav-link {
+  @apply text-light-fg-muted hover:text-light-fg-default hover:bg-light-canvas-subtle;
+}
+
+.light .nav-link-active {
+  @apply text-light-fg-default bg-light-canvas-subtle;
+}
+
+/* Light mode footer */
+.light footer {
+  @apply bg-light-canvas-subtle border-light-border text-light-fg-muted;
+}
+
+/* Light mode badges */
+.light .badge-success {
+  @apply bg-green-100 text-green-800 border-green-300;
+}
+
+.light .badge-warning {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-300;
+}
+
+.light .badge-danger {
+  @apply bg-red-100 text-red-800 border-red-300;
+}
+
+.light .badge-info {
+  @apply bg-blue-100 text-blue-800 border-blue-300;
+}
+
+/* Light mode search box */
+.light .search-box {
+  @apply bg-light-canvas border-light-border focus-within:border-light-accent focus-within:ring-light-accent;
+}
+
+.light .search-box input {
+  @apply text-light-fg-default placeholder-light-fg-subtle;
+}
+
+/* Light mode - force background colors for nested elements */
+.light .bg-gh-canvas-subtle {
+  @apply bg-light-canvas-subtle !important;
+}
+
+.light .bg-gh-canvas {
+  @apply bg-light-canvas !important;
+}
+
+.light .bg-gh-btn-bg {
+  @apply bg-light-btn-bg !important;
+}
+
+.light .bg-gh-btn-hover:hover {
+  @apply bg-light-btn-hover !important;
+}
+
+/* Light mode - icon backgrounds in cards */
+.light .bg-blue-900\/30 {
+  @apply bg-blue-500/10 !important;
+}
+
+.light .bg-green-900\/30 {
+  @apply bg-green-500/10 !important;
+}
+
+.light .bg-yellow-900\/30 {
+  @apply bg-yellow-500/10 !important;
+}
+
+.light .bg-purple-900\/30 {
+  @apply bg-purple-500/10 !important;
+}
+
+.light .bg-red-900\/30 {
+  @apply bg-red-500/10 !important;
+}
+
+/* Modal backgrounds - ensure they are opaque */
+.card-gh {
+  background-color: #161b22 !important;
+}
+
+.light .card-gh {
+  background-color: #ffffff !important;
+}

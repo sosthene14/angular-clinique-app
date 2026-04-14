@@ -1,0 +1,151 @@
+@if (show) {
+  <div (click)="onClose()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div (click)="$event.stopPropagation()" class="card-gh max-w-2xl w-full my-8">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gh-warning/20 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gh-fg-default">{{ isEditMode ? 'Modifier le Rendez-vous' : 'Nouveau Rendez-vous' }}</h3>
+            <p class="text-sm text-gh-fg-muted">{{ isEditMode ? 'Modifier les informations' : 'Planifier un nouveau rendez-vous' }}</p>
+          </div>
+        </div>
+        <button (click)="onClose()" class="btn-secondary p-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="rdvForm" (ngSubmit)="onSubmit()">
+        @if (errorMessage) {
+          <div class="mb-4 p-3 bg-red-900/20 border border-gh-danger rounded-md">
+            <p class="text-sm text-gh-danger">{{ errorMessage }}</p>
+          </div>
+        }
+
+        @if (isLoadingData) {
+          <div class="flex items-center justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-gh-accent" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        } @else {
+          <div class="space-y-4">
+            <!-- Patient -->
+            <div>
+              <label class="block text-sm font-medium text-gh-fg-default mb-2">Patient *</label>
+              <select formControlName="patientId" class="input-gh">
+                <option value="">Sélectionner un patient</option>
+                @for (patient of patients; track patient.id) {
+                  <option [value]="patient.id">{{ patient.nom }} {{ patient.prenom }} - {{ patient.cin }}</option>
+                }
+              </select>
+              @if (rdvForm.get('patientId')?.invalid && rdvForm.get('patientId')?.touched) {
+                <p class="mt-1 text-xs text-gh-danger">Patient requis</p>
+              }
+              @if (patients.length === 0) {
+                <p class="mt-1 text-xs text-gh-fg-muted">Aucun patient disponible. Ajoutez d'abord des patients.</p>
+              }
+            </div>
+
+            <!-- Médecin -->
+            <div>
+              <label class="block text-sm font-medium text-gh-fg-default mb-2">Médecin *</label>
+              <select formControlName="medecinId" class="input-gh">
+                <option value="">Sélectionner un médecin</option>
+                @for (medecin of medecins; track medecin.id) {
+                  <option [value]="medecin.id">Dr. {{ medecin.nom }} {{ medecin.prenom }} - {{ medecin.specialite }}</option>
+                }
+              </select>
+              @if (rdvForm.get('medecinId')?.invalid && rdvForm.get('medecinId')?.touched) {
+                <p class="mt-1 text-xs text-gh-danger">Médecin requis</p>
+              }
+              @if (medecins.length === 0) {
+                <p class="mt-1 text-xs text-gh-fg-muted">Aucun médecin disponible. Ajoutez d'abord des médecins.</p>
+              }
+            </div>
+
+            <!-- Date et heure -->
+            <div>
+              <label class="block text-sm font-medium text-gh-fg-default mb-2">Date et heure *</label>
+              <input 
+                type="datetime-local" 
+                formControlName="dateHeure" 
+                class="input-gh" 
+                [min]="getMinDateTime()"
+              />
+              @if (rdvForm.get('dateHeure')?.invalid && rdvForm.get('dateHeure')?.touched) {
+                <p class="mt-1 text-xs text-gh-danger">Date et heure requises</p>
+              }
+            </div>
+
+            <!-- Motif -->
+            <div>
+              <label class="block text-sm font-medium text-gh-fg-default mb-2">Motif de consultation *</label>
+              <input 
+                type="text" 
+                formControlName="motif" 
+                class="input-gh" 
+                placeholder="Ex: Consultation de routine, Contrôle..."
+              />
+              @if (rdvForm.get('motif')?.invalid && rdvForm.get('motif')?.touched) {
+                <p class="mt-1 text-xs text-gh-danger">Motif requis (min. 5 caractères)</p>
+              }
+            </div>
+
+            <!-- Statut -->
+            <div>
+              <label class="block text-sm font-medium text-gh-fg-default mb-2">Statut</label>
+              <select formControlName="statut" class="input-gh">
+                <option value="EN_ATTENTE">En attente</option>
+                <option value="CONFIRME">Confirmé</option>
+                <option value="ANNULE">Annulé</option>
+                <option value="TERMINE">Terminé</option>
+              </select>
+            </div>
+
+            <!-- Notes -->
+            <div>
+              <label class="block text-sm font-medium text-gh-fg-default mb-2">Notes (optionnel)</label>
+              <textarea 
+                formControlName="notes" 
+                class="input-gh" 
+                rows="3" 
+                placeholder="Notes additionnelles, instructions spéciales..."
+              ></textarea>
+            </div>
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="flex gap-3 justify-end mt-6 pt-6 border-t border-gh-border">
+          <button type="button" (click)="onClose()" class="btn-secondary">Annuler</button>
+          <button 
+            type="submit" 
+            [disabled]="rdvForm.invalid || isLoading || isLoadingData || patients.length === 0 || medecins.length === 0" 
+            class="btn-primary disabled:opacity-50"
+          >
+            @if (isLoading) {
+              <span class="flex items-center gap-2">
+                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {{ isEditMode ? 'Modification...' : 'Création...' }}
+              </span>
+            } @else {
+              {{ isEditMode ? 'Modifier' : 'Créer le rendez-vous' }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

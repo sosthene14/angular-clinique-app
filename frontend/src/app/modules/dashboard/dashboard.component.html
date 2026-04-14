@@ -1,0 +1,271 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gh-fg-default">Dashboard</h1>
+      <p class="text-gh-fg-muted mt-1">Vue d'ensemble de la clinique</p>
+    </div>
+    <button (click)="loadStats()" class="btn-secondary">
+      <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Actualiser
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="flex items-center justify-center py-20">
+      <svg class="animate-spin h-12 w-12 text-gh-accent" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  } @else if (error) {
+    <div class="card-gh bg-red-900/20 border-gh-danger">
+      <p class="text-gh-danger">{{ error }}</p>
+    </div>
+  } @else if (stats) {
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Total Patients -->
+      <div class="card-gh hover:border-gh-accent transition-colors cursor-pointer">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gh-fg-muted text-sm font-medium">Total Patients</p>
+            <p class="text-3xl font-bold text-gh-fg-default mt-2">{{ stats.totalPatients }}</p>
+          </div>
+          <div class="w-12 h-12 bg-blue-900/30 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-gh-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Médecins -->
+      <div class="card-gh hover:border-gh-accent transition-colors cursor-pointer">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gh-fg-muted text-sm font-medium">Total Médecins</p>
+            <p class="text-3xl font-bold text-gh-fg-default mt-2">{{ stats.totalMedecins }}</p>
+          </div>
+          <div class="w-12 h-12 bg-green-900/30 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-gh-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- RDV Aujourd'hui -->
+      <div class="card-gh hover:border-gh-accent transition-colors cursor-pointer">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gh-fg-muted text-sm font-medium">RDV Aujourd'hui</p>
+            <p class="text-3xl font-bold text-gh-fg-default mt-2">{{ stats.rdvAujourdhui }}</p>
+          </div>
+          <div class="w-12 h-12 bg-yellow-900/30 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- RDV À venir -->
+      <div class="card-gh hover:border-gh-accent transition-colors cursor-pointer">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gh-fg-muted text-sm font-medium">RDV À venir</p>
+            <p class="text-3xl font-bold text-gh-fg-default mt-2">{{ stats.rdvAVenir }}</p>
+          </div>
+          <div class="w-12 h-12 bg-purple-900/30 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Rendez-vous par Statut -->
+      <div class="card-gh">
+        <h3 class="text-lg font-semibold text-gh-fg-default mb-6">Rendez-vous par Statut</h3>
+        
+        <div class="space-y-4">
+          @for (item of rdvStatutData; track item.label) {
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gh-fg-muted">{{ item.label }}</span>
+                <span class="text-sm font-medium text-gh-fg-default">
+                  {{ item.value }} ({{ getPercentage(item.value) }}%)
+                </span>
+              </div>
+              <div class="w-full bg-gh-canvas-subtle rounded-full h-2">
+                <div 
+                  [class]="item.color + ' h-2 rounded-full transition-all duration-500'"
+                  [style.width.%]="getPercentage(item.value)"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-gh-border">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gh-fg-muted">Total Rendez-vous</span>
+            <span class="font-semibold text-gh-fg-default">{{ stats.totalRendezVous }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistiques Détaillées -->
+      <div class="card-gh">
+        <h3 class="text-lg font-semibold text-gh-fg-default mb-6">Statistiques Détaillées</h3>
+        
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 bg-gh-canvas-subtle rounded-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-yellow-900/30 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="text-gh-fg-default">En attente</span>
+            </div>
+            <span class="badge badge-warning">{{ stats.rdvParStatut.EN_ATTENTE }}</span>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gh-canvas-subtle rounded-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-gh-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="text-gh-fg-default">Confirmé</span>
+            </div>
+            <span class="badge badge-info">{{ stats.rdvParStatut.CONFIRME }}</span>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gh-canvas-subtle rounded-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-green-900/30 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-gh-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span class="text-gh-fg-default">Terminé</span>
+            </div>
+            <span class="badge badge-success">{{ stats.rdvParStatut.TERMINE }}</span>
+          </div>
+
+          <div class="flex items-center justify-between p-3 bg-gh-canvas-subtle rounded-lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-red-900/30 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-gh-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <span class="text-gh-fg-default">Annulé</span>
+            </div>
+            <span class="badge badge-danger">{{ stats.rdvParStatut.ANNULE }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card-gh">
+      <h3 class="text-lg font-semibold text-gh-fg-default mb-4">Actions Rapides</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @if (permissionService.canCreatePatient()) {
+          <button (click)="openPatientModal()" class="flex items-center gap-3 p-4 bg-gh-canvas-subtle rounded-lg hover:bg-gh-btn-hover transition-colors">
+            <svg class="w-8 h-8 text-gh-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <div>
+              <p class="font-medium text-gh-fg-default">Nouveau Patient</p>
+              <p class="text-xs text-gh-fg-muted">Ajouter un patient</p>
+            </div>
+          </button>
+        } @else {
+          <a routerLink="/patients" class="flex items-center gap-3 p-4 bg-gh-canvas-subtle rounded-lg hover:bg-gh-btn-hover transition-colors">
+            <svg class="w-8 h-8 text-gh-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <div>
+              <p class="font-medium text-gh-fg-default">Voir Patients</p>
+              <p class="text-xs text-gh-fg-muted">Liste des patients</p>
+            </div>
+          </a>
+        }
+
+        @if (permissionService.canCreateMedecin()) {
+          <button (click)="openMedecinModal()" class="flex items-center gap-3 p-4 bg-gh-canvas-subtle rounded-lg hover:bg-gh-btn-hover transition-colors">
+            <svg class="w-8 h-8 text-gh-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <div>
+              <p class="font-medium text-gh-fg-default">Nouveau Médecin</p>
+              <p class="text-xs text-gh-fg-muted">Ajouter un médecin</p>
+            </div>
+          </button>
+        } @else {
+          <a routerLink="/medecins" class="flex items-center gap-3 p-4 bg-gh-canvas-subtle rounded-lg hover:bg-gh-btn-hover transition-colors">
+            <svg class="w-8 h-8 text-gh-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p class="font-medium text-gh-fg-default">Voir Médecins</p>
+              <p class="text-xs text-gh-fg-muted">Liste des médecins</p>
+            </div>
+          </a>
+        }
+
+        @if (permissionService.canCreateRendezVous()) {
+          <button (click)="openRdvModal()" class="flex items-center gap-3 p-4 bg-gh-canvas-subtle rounded-lg hover:bg-gh-btn-hover transition-colors">
+            <svg class="w-8 h-8 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <div>
+              <p class="font-medium text-gh-fg-default">Nouveau RDV</p>
+              <p class="text-xs text-gh-fg-muted">Planifier un rendez-vous</p>
+            </div>
+          </button>
+        } @else {
+          <a routerLink="/rendez-vous" class="flex items-center gap-3 p-4 bg-gh-canvas-subtle rounded-lg hover:bg-gh-btn-hover transition-colors">
+            <svg class="w-8 h-8 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div>
+              <p class="font-medium text-gh-fg-default">Voir RDV</p>
+              <p class="text-xs text-gh-fg-muted">Liste des rendez-vous</p>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Modals -->
+<app-patient-form 
+  [show]="showPatientModal" 
+  (close)="closePatientModal()" 
+  (success)="onPatientAdded()"
+></app-patient-form>
+
+<app-medecin-form 
+  [show]="showMedecinModal" 
+  (close)="closeMedecinModal()" 
+  (success)="onMedecinAdded()"
+></app-medecin-form>
+
+<app-rdv-form 
+  [show]="showRdvModal" 
+  (close)="closeRdvModal()" 
+  (success)="onRdvAdded()"
+></app-rdv-form>

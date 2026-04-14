@@ -1,0 +1,136 @@
+@if (show) {
+  <div (click)="onClose()" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+    <div (click)="$event.stopPropagation()" class="card-gh max-w-2xl w-full my-8">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gh-warning/20 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-gh-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-gh-fg-default">Détails du Rendez-vous</h3>
+            <p class="text-sm text-gh-fg-muted">Informations complètes</p>
+          </div>
+        </div>
+        <button (click)="onClose()" class="btn-secondary p-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      @if (isLoading) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="animate-spin h-8 w-8 text-gh-accent" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      } @else if (error) {
+        <div class="p-4 bg-red-900/20 border border-gh-danger rounded-md">
+          <p class="text-gh-danger">{{ error }}</p>
+        </div>
+      } @else if (rdv) {
+        <div class="space-y-6">
+          <!-- Date et Statut -->
+          <div>
+            <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Rendez-vous</h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Date et heure</p>
+                <p class="text-gh-fg-default font-medium">{{ formatDateTime(rdv.dateHeure) }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Statut</p>
+                <span [class]="'badge ' + getStatutBadgeClass(rdv.statut)">
+                  {{ getStatutLabel(rdv.statut) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient -->
+          @if (rdv.patient) {
+            <div>
+              <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Patient</h4>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Nom complet</p>
+                  <p class="text-gh-fg-default font-medium">{{ rdv.patient.nom }} {{ rdv.patient.prenom }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">CIN</p>
+                  <p class="text-gh-fg-default font-mono">{{ rdv.patient.cin }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Téléphone</p>
+                  <p class="text-gh-fg-default">{{ rdv.patient.telephone }}</p>
+                </div>
+                @if (rdv.patient.email) {
+                  <div>
+                    <p class="text-xs text-gh-fg-muted mb-1">Email</p>
+                    <p class="text-gh-fg-default">{{ rdv.patient.email }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Médecin -->
+          @if (rdv.medecin) {
+            <div>
+              <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Médecin</h4>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Nom complet</p>
+                  <p class="text-gh-fg-default font-medium">Dr. {{ rdv.medecin.nom }} {{ rdv.medecin.prenom }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Spécialité</p>
+                  <p class="text-gh-fg-default">{{ rdv.medecin.specialite }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Matricule</p>
+                  <p class="text-gh-fg-default font-mono">{{ rdv.medecin.matricule }}</p>
+                </div>
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Téléphone</p>
+                  <p class="text-gh-fg-default">{{ rdv.medecin.telephone }}</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Motif et Notes -->
+          <div>
+            <h4 class="text-sm font-semibold text-gh-fg-muted uppercase mb-3">Détails de la consultation</h4>
+            <div class="space-y-4">
+              <div>
+                <p class="text-xs text-gh-fg-muted mb-1">Motif de consultation</p>
+                <div class="p-3 bg-gh-canvas-subtle rounded-md">
+                  <p class="text-sm text-gh-fg-default">{{ rdv.motif }}</p>
+                </div>
+              </div>
+              @if (rdv.notes) {
+                <div>
+                  <p class="text-xs text-gh-fg-muted mb-1">Notes</p>
+                  <div class="p-3 bg-gh-canvas-subtle rounded-md">
+                    <p class="text-sm text-gh-fg-default">{{ rdv.notes }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex justify-end mt-6 pt-6 border-t border-gh-border">
+          <button (click)="onClose()" class="btn-secondary">Fermer</button>
+        </div>
+      }
+    </div>
+  </div>
+}
